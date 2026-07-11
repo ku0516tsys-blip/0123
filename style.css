@@ -1,0 +1,190 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  background: linear-gradient(
+    135deg,
+    #81d8d0,
+    #b9f1ec
+  );
+
+  color: white;
+}
+
+.stopwatch {
+  width: 100%;
+  max-width: 550px;
+  padding: 40px 30px;
+  text-align: center;
+
+  background:
+    rgba(255, 255, 255, 0.25);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.6);
+
+  border-radius: 30px;
+
+  box-shadow:
+    0 20px 50px
+    rgba(0, 100, 100, 0.2);
+
+  backdrop-filter: blur(15px);
+}
+
+h1 {
+  margin-top: 0;
+  margin-bottom: 30px;
+  font-size: 32px;
+  color: white;
+  letter-spacing: 2px;
+}
+
+.time {
+  margin-bottom: 35px;
+
+  font-size: clamp(
+    48px,
+    12vw,
+    80px
+  );
+
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+  color: white;
+
+  text-shadow:
+    0 5px 20px
+    rgba(0, 100, 100, 0.2);
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+button {
+  min-height: 55px;
+  padding: 12px;
+  border: none;
+  border-radius: 50px;
+
+  font-size: 16px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    opacity 0.2s;
+}
+
+button:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 10px 25px
+    rgba(0, 100, 100, 0.25);
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.start-button {
+  color: #81d8d0;
+  background: white;
+}
+
+.lap-button {
+  color: white;
+
+  background:
+    rgba(255, 255, 255, 0.25);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.8);
+}
+
+.reset-button {
+  color: white;
+  background: #55bdb5;
+}
+
+.lap-area {
+  margin-top: 35px;
+}
+
+.lap-area h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: white;
+}
+
+#lapList {
+  max-height: 250px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+#lapList li {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 14px 10px;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.35);
+
+  font-variant-numeric: tabular-nums;
+  color: white;
+}
+
+.empty-message {
+  justify-content: center !important;
+
+  color:
+    rgba(255, 255, 255, 0.75) !important;
+}
+
+@media screen and (max-width: 480px) {
+  .stopwatch {
+    padding: 30px 18px;
+  }
+
+  .buttons {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .start-button {
+    grid-column: 1 / -1;
+  }
+}
