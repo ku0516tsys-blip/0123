@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>ストップウォッチ</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <main class="stopwatch">
+
+    <h1>ストップウォッチ</h1>
+
+    <div id="time" class="time">
+      00:00.00
+    </div>
+
+    <div class="buttons">
+
+      <button
+        id="startButton"
+        class="start-button"
+      >
+        スタート
+      </button>
+
+      <button
+        id="lapButton"
+        class="lap-button"
+        disabled
+      >
+        ラップ
+      </button>
+
+      <button
+        id="resetButton"
+        class="reset-button"
+      >
+        リセット
+      </button>
+
+    </div>
+
+    <div class="lap-area">
+
+      <h2>ラップ記録</h2>
+
+      <ul id="lapList">
+
+        <li class="empty-message">
+          ラップ記録はありません
+        </li>
+
+      </ul>
+
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
