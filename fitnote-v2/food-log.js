@@ -85,6 +85,7 @@ function estimateFood(text){
  sum.k=Math.round(sum.k);for(const k of ['p','f','c'])sum[k]=Math.round(sum[k]*10)/10;
  return {ok:items.length>0,missing,items,sum:items.length?sum:null};
 }
+window.fitnoteEstimateFood=estimateFood;
 function foodProgress(label,v,t,color){
  const pct=t>0?Math.max(0,Math.min(100,100*v/t)):0;
  return `<div style="margin:11px 0"><div class="row" style="font-size:12px"><b>${label}</b><span>${Math.round(v*10)/10} / ${t} g</span></div><div class="bar" style="margin-top:6px"><span style="width:${pct}%;background:${color}"></span></div></div>`;
