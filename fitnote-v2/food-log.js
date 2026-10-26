@@ -134,7 +134,7 @@ function foodActualView(){
 const baseMealsView=mealsView,baseHomeView=homeView;
 mealsView=function(){
  const tabs=`<div class="food-tabs"><button class="${foodMode==='actual'?'active':''}" onclick="setFoodMode('actual')">🍴 食べたものを記録</button><button class="${foodMode==='plan'?'active':''}" onclick="setFoodMode('plan')">📋 提案献立を見る</button></div>`;
- const view=foodMode==='actual'?foodActualView():baseMealsView();
+ const view=foodMode==='actual'?foodActualView():(typeof window.smartPlanView==='function'?window.smartPlanView():baseMealsView());
  return tabs+view+(foodMode==='plan'?'<div class="notice" style="margin:10px 0">献立は食事の提案です。チェックしても実際の摂取集計には加算されません。食べたものは「食べたものを記録」から登録してください。</div>':'');
 };
 homeView=function(){
