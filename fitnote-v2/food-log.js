@@ -156,6 +156,7 @@ window.saveFoodUI=function(){
  if(!name){notify('食べたものを入力してください');return;}
  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date>today){notify('食べた日付を確認してください');return;}
  const raw=['foodK','foodP','foodF','foodC'].map(id=>$('#'+id)?.value?.trim()??'');
+ if(raw.every(x=>x==='')){const estimated=estimateFood(name);if(estimated.ok&&estimated.missing.length===0){raw.splice(0,4,String(estimated.sum.k),String(estimated.sum.p),String(estimated.sum.f),String(estimated.sum.c));}else if(estimated.ok){notify('一部の食品が未対応です。概算ボタンで確認して、数値を補正してください');return;}}
  let nutrient=null;
  if(raw.some(x=>x!=='')){
   if(raw.some(x=>x==='')){notify('栄養素は4項目すべて入力するか、空欄のまま保存してください');return;}
