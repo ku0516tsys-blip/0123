@@ -6,6 +6,7 @@ let recentShown=[],favoriteShown=[],editId=null,photoDraft=null,photoChanged=fal
 const oldRender=render,oldEdit=window.editFood,oldCancel=window.cancelFoodEdit,oldSave=window.saveFoodUI,oldSetMode=window.setFoodMode;
 const findPhoto=id=>state.foodEntries?.find(x=>x.id===id)?.photo||null;
 function pickList(){
+ if(!Array.isArray(state.foodFavorites))state.foodFavorites=[];
  const arr=Array.isArray(state.foodEntries)?[...state.foodEntries].sort((a,b)=>String(b.createdAt||b.id).localeCompare(String(a.createdAt||a.id))):[];
  const seen=new Set();recentShown=[];
  for(const x of arr){const sig=[x.name,x.k,x.p,x.f,x.c].join('|');if(!seen.has(sig)){recentShown.push(x);seen.add(sig);}if(recentShown.length>=8)break;}
@@ -36,6 +37,7 @@ function insertReuse(){
   const pos=[...document.querySelectorAll('.food-log-entry')].indexOf(row);
   const days=state.foodEntries.filter(x=>x.date===(chosenDate>today?today:chosenDate)).sort((a,b)=>String(b.createdAt||b.id).localeCompare(String(a.createdAt||a.id)));
   const item=days[pos];if(!item)return;
+  if(item.photo&&!row.querySelector('.fit-thumb')){const thumb=document.createElement('img');thumb.src=item.photo;thumb.alt='食事の写真';thumb.className='fit-thumb';row.querySelector('.food-log-entry .grow')?.append(thumb);}
   const c=document.createElement('button');c.className='btn white sm';c.textContent='＋再記録';c.type='button';c.addEventListener('click',()=>window.reuseFoodById(item.id));
   const f=document.createElement('button');f.className='btn gray sm';f.type='button';f.textContent=state.foodFavorites.some(x=>x.name===item.name&&x.k===item.k&&x.p===item.p&&x.f===item.f&&x.c===item.c)?'★':'☆';
   f.setAttribute('aria-label','お気に入り切り替え');f.addEventListener('click',()=>window.toggleFoodFav(item.id));
@@ -98,7 +100,7 @@ window.saveFoodUI=function(){
  editId=null;photoDraft=null;photoChanged=false;
 };
 const css=document.createElement('style');css.textContent=`
-.fit-reuse-row{display:flex;gap:7px;align-items:center;border-bottom:1px solid #e8eef7;padding:10px 0}.fit-reuse-row:last-child{border:0}.fit-reuse-row b{font-size:12px}
+.fit-thumb{width:62px;height:62px;object-fit:cover;border-radius:12px;display:block;margin-top:6px}.fit-reuse-row{display:flex;gap:7px;align-items:center;border-bottom:1px solid #e8eef7;padding:10px 0}.fit-reuse-row:last-child{border:0}.fit-reuse-row b{font-size:12px}
 .fit-reuse-row button,.food-actions button{white-space:nowrap;padding:7px 8px}.food-actions{flex-wrap:wrap;justify-content:flex-end}.fit-example-row{display:flex;flex-wrap:wrap;gap:5px}.fit-example-row button{border:1px solid #d5e2fa;border-radius:100px;background:#f1f6ff;color:#3562aa;font-size:11px;padding:7px 10px}.fit-example{padding:11px 0 0}`;
 document.head.append(css);render();
 })();
