@@ -135,7 +135,7 @@ function customForm(){
  <div class="field"><label>材料・分量メモ</label><input id="recipeDetail" maxlength="160" value="${esc(old?.detail||'')}" placeholder="例：鶏むね150g、トマト、白米180g"></div>
  <div class="field"><label>食事タイミング</label><select id="recipeSlot">${SLOTS.map(x=>`<option ${old?.slot===x?'selected':pickSlot===x?'selected':''}>${x}</option>`).join('')}</select></div>
  <div class="grid2">${[['recipeK','k','カロリー（kcal）'],['recipeP','p','P（g）'],['recipeF','f','F（g）'],['recipeC','c','C（g）']].map(([id,key,label])=>`<div class="field"><label>${label}</label><input type="number" id="${id}" min="0" max="15000" step="0.1" placeholder="任意" value="${old?.[key]??''}"></div>`).join('')}</div>
- <div class="note">不明なら空欄で保存可能。数値は任意の目安です。保存した献立は次回も「自作メニュー」から選べます。</div>
+ <button class="btn white full" onclick="planEstimateCustom()">材料メモから栄養素を概算</button><div class="note">不明なら空欄で保存可能。栄養値は食材の一般的な参考値で、調理油や調味料は反映されない場合があります。自作の献立は次回も選べます。</div>
  <button class="btn full" onclick="planStoreCustom()">この献立を保存して追加</button></div></div>`;
 }
 function smartPlanView(){
@@ -200,6 +200,15 @@ window.planUseFavorite=function(i){
 };
 window.planRemoveFavorite=function(i){state.recipeSaved.splice(i,1);save();render()};
 window.planToggleForm=function(){planFormOpen=!planFormOpen;pickSlot='';render()};
+window.planEstimateCustom=function(){
+ const name=document.getElementById('recipeName')?.value.trim()||'';
+ const ingredients=document.getElementById('recipeDetail')?.value.trim()||name;
+ const estimate=window.fitnoteEstimateFood?.(ingredients);
+ if(!estimate?.ok){notify('対応する食品が見つかりません。栄養素を手入力してください');return}
+ if(estimate.missing.length){notify('未対応の食品があります。栄養素を手動で確認してください');return}
+ for(const [id,key] of [['recipeK','k'],['recipeP','p'],['recipeF','f'],['recipeC','c']]){const node=document.getElementById(id);if(node)node.value=estimate.sum[key];}
+ notify('材料からおおよその栄養素を入力しました');
+};
 window.planStoreCustom=function(){
  const name=document.getElementById('recipeName')?.value.trim().slice(0,60)||'',detail=document.getElementById('recipeDetail')?.value.trim().slice(0,160)||'',slot=document.getElementById('recipeSlot')?.value||'昼食';
  if(!name)return notify('料理名を入力してください');
