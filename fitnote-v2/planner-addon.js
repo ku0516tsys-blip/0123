@@ -101,6 +101,7 @@ function recipeRow(x,index,plan){
  return `<div class="plan-row"><div class="plan-emoji">${x.emoji||'🍽️'}</div><div class="grow">
   <b>${esc(x.name)}</b><div class="tiny">${esc(x.detail||'材料は自由に調整')}</div>
   <div class="plan-nutrients">${x.k==null?'栄養素未設定':`${x.k} kcal ・ P${x.p} / F${x.f} / C${x.c} g`}</div>
+  <button type="button" class="recipe-open" onclick="planShowRecipe(${index})">📖 材料・作り方を見る ›</button>
  </div><div class="plan-acts">
  <button type="button" class="btn white sm" onclick="planLog(${index})">食べた</button>
  <button type="button" class="plan-icon" onclick="planSaveRecipe(${index})" title="この献立を保存">☆</button>
@@ -123,7 +124,7 @@ function picker(){
  return `<div class="card" style="margin-top:12px;border-color:#cbdcff">
  <div class="row"><b>${esc(slot)}の候補を選ぶ</b><button class="btn gray sm" onclick="planClosePicker()">閉じる</button></div>
  <div class="plan-chips">${gen.map(x=>`<button class="${pickGenre===x?'active':''}" onclick="planGenre('${x}')">${x}</button>`).join('')}</div>
- <div class="plan-candidates">${visible.map(x=>`<div class="plan-candidate"><div class="plan-emoji">${x.emoji||'🍽️'}</div><div class="grow"><b>${esc(x.name)}</b><div class="tiny">${esc(x.detail||'')}</div><div class="tiny">${x.k??'—'}kcal ・ P${x.p??'—'} F${x.f??'—'} C${x.c??'—'}</div></div><button class="btn white sm" onclick="planChoose('${x.origin==='custom'?'c':'b'}',${x.id})">選択</button></div>`).join('')}</div>
+ <div class="plan-candidates">${visible.map(x=>`<div class="plan-candidate"><div class="plan-emoji">${x.emoji||'🍽️'}</div><div class="grow"><b>${esc(x.name)}</b><div class="tiny">${esc(x.detail||'')}</div><div class="tiny">${x.k??'—'}kcal ・ P${x.p??'—'} F${x.f??'—'} C${x.c??'—'}</div></div><button class="btn white sm" onclick="planShowCandidate('${x.origin==='custom'?'c':'b'}',${x.id})">レシピ</button><button class="btn white sm" onclick="planChoose('${x.origin==='custom'?'c':'b'}',${x.id})">選択</button></div>`).join('')}</div>
  </div>`;
 }
 function customForm(){
@@ -133,6 +134,7 @@ function customForm(){
  <div class="stack" style="margin-top:13px">
  <div class="field"><label>料理名</label><input id="recipeName" maxlength="60" value="${esc(old?.name||'')}" placeholder="例：鶏むね肉のトマト煮込み"></div>
  <div class="field"><label>材料・分量メモ</label><input id="recipeDetail" maxlength="160" value="${esc(old?.detail||'')}" placeholder="例：鶏むね150g、トマト、白米180g"></div>
+ <div class="field"><label>作り方・手順（任意）</label><textarea id="recipeSteps" rows="4" maxlength="1000" placeholder="例：肉を切って下味をつけ、フライパンで焼く。">${esc(old?.steps||'')}</textarea></div>
  <div class="field"><label>食事タイミング</label><select id="recipeSlot">${SLOTS.map(x=>`<option ${old?.slot===x?'selected':pickSlot===x?'selected':''}>${x}</option>`).join('')}</select></div>
  <div class="grid2">${[['recipeK','k','カロリー（kcal）'],['recipeP','p','P（g）'],['recipeF','f','F（g）'],['recipeC','c','C（g）']].map(([id,key,label])=>`<div class="field"><label>${label}</label><input type="number" id="${id}" min="0" max="15000" step="0.1" placeholder="任意" value="${old?.[key]??''}"></div>`).join('')}</div>
  <button class="btn white full" onclick="planEstimateCustom()">材料メモから栄養素を概算</button><div class="note">不明なら空欄で保存可能。栄養値は食材の一般的な参考値で、調理油や調味料は反映されない場合があります。自作の献立は次回も選べます。</div>
@@ -161,7 +163,7 @@ function smartPlanView(){
 }
 window.smartPlanView=smartPlanView;
 function planFavorites(){
- return state.recipeSaved.length?`<div class="card" style="margin-top:12px"><b>⭐ 保存した献立</b><div class="plan-saved">${state.recipeSaved.map((x,i)=>`<div class="plan-candidate"><span class="plan-emoji">${x.emoji||'🍽️'}</span><div class="grow"><b>${esc(x.name)}</b><div class="tiny">${esc(x.slot)} ・ ${x.k??'—'} kcal</div></div><button class="btn white sm" onclick="planUseFavorite(${i})">使う</button><button class="plan-icon" onclick="planRemoveFavorite(${i})">×</button></div>`).join('')}</div></div>`:'';
+ return state.recipeSaved.length?`<div class="card" style="margin-top:12px"><b>⭐ 保存した献立</b><div class="plan-saved">${state.recipeSaved.map((x,i)=>`<div class="plan-candidate"><span class="plan-emoji">${x.emoji||'🍽️'}</span><div class="grow"><b>${esc(x.name)}</b><div class="tiny">${esc(x.slot)} ・ ${x.k??'—'} kcal</div></div><button class="btn white sm" onclick="planShowSavedRecipe(${i})">レシピ</button><button class="btn white sm" onclick="planUseFavorite(${i})">使う</button><button class="plan-icon" onclick="planRemoveFavorite(${i})">×</button></div>`).join('')}</div></div>`:'';
 }
 window.planDateChange=function(d){if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||d<today)return;chosenDate=d;pickSlot='';planFormOpen=false;render();};
 window.planSwitchMode=function(mode){
@@ -210,7 +212,7 @@ window.planEstimateCustom=function(){
  notify('材料からおおよその栄養素を入力しました');
 };
 window.planStoreCustom=function(){
- const name=document.getElementById('recipeName')?.value.trim().slice(0,60)||'',detail=document.getElementById('recipeDetail')?.value.trim().slice(0,160)||'',slot=document.getElementById('recipeSlot')?.value||'昼食';
+ const name=document.getElementById('recipeName')?.value.trim().slice(0,60)||'',detail=document.getElementById('recipeDetail')?.value.trim().slice(0,160)||'',steps=document.getElementById('recipeSteps')?.value.trim().slice(0,1000)||'',slot=document.getElementById('recipeSlot')?.value||'昼食';
  if(!name)return notify('料理名を入力してください');
  const values=['recipeK','recipeP','recipeF','recipeC'].map(x=>document.getElementById(x)?.value.trim()??'');
  let nutrients=[null,null,null,null];
@@ -219,12 +221,15 @@ window.planStoreCustom=function(){
    nutrients=values.map((v,i)=>{const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=(i===0?15000:1500)?Math.round(n*10)/10:null});
    if(nutrients.some(v=>v===null))return notify('栄養素の値を確認してください');
  }
- const item={id:Date.now()+Math.floor(Math.random()*1000),uid:unique(),slot,name,detail,emoji:'🍽️',k:nutrients[0],p:nutrients[1],f:nutrients[2],c:nutrients[3],styles:['balanced','lowfat','lowcarb','keto'],genre:'自作',origin:'custom'};
+ const item={id:Date.now()+Math.floor(Math.random()*1000),uid:unique(),slot,name,detail,steps,emoji:'🍽️',k:nutrients[0],p:nutrients[1],f:nutrients[2],c:nutrients[3],styles:['balanced','lowfat','lowcarb','keto'],genre:'自作',origin:'custom'};
  state.recipeCustom.push(item);
  const p=currentPlan();
  if(p.mode==='auto')state.recipePlans[chosenDate]={mode:'manual',round:0,items:[item]};else p.items.push({...item,uid:unique()});
  planFormOpen=false;save();render();notify('自作献立を保存しました');
 };
+window.planShowRecipe=function(i){const x=currentPlan().items[i];if(x&&window.fitnoteOpenRecipe)window.fitnoteOpenRecipe(x);};
+window.planShowCandidate=function(kind,id){const x=kind==='c'?state.recipeCustom.find(t=>t.id===id):BANK.find(t=>t.id===id);if(x&&window.fitnoteOpenRecipe)window.fitnoteOpenRecipe(x);};
+window.planShowSavedRecipe=function(i){const x=state.recipeSaved[i];if(x&&window.fitnoteOpenRecipe)window.fitnoteOpenRecipe(x);};
 window.planLog=function(i){
  const x=currentPlan().items[i];if(!x)return;if(chosenDate>today)return notify('未来の日付は記録できません');
  state.foodEntries??=[];
@@ -232,7 +237,7 @@ window.planLog=function(i){
  save();render();notify('食事記録に追加しました');
 };
 const style=document.createElement('style');style.textContent=`
-.plan-modes{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}.plan-modes button{padding:13px 9px;text-align:left;border-radius:15px;border:1px solid #e2eaf6;background:#fff;color:#7f8aa3}.plan-modes button.active{border-color:#679aff;background:#ebf3ff;color:#285ac0}.plan-modes b{font-size:13px;display:block}.plan-modes span{display:block;font-size:10px;margin-top:5px}.plan-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}.plan-days button{display:grid;gap:4px;place-items:center;padding:9px 0;border:1px solid #ebeff6;border-radius:11px;background:#fff;color:#8993a7}.plan-days button.active{background:#ebf3ff;border-color:#7ba5ff;color:#326df6}.plan-days button span{font-size:10px}.plan-days button b{font-size:15px}.plan-row{display:flex;align-items:center;gap:9px;border-bottom:1px solid #ebeff6;padding:11px 0}.plan-row:last-child{border-bottom:0}.plan-row b,.plan-candidate b{font-size:12px}.plan-emoji{min-width:37px;height:37px;background:#f3f7fe;border-radius:12px;display:grid;place-items:center;font-size:21px}.plan-nutrients{font-size:11px;font-weight:800;color:#4876b5;margin-top:3px}.plan-acts{display:flex;flex-direction:column;gap:4px}.plan-acts button{min-width:45px}.plan-icon{border:1px solid #e8edf6;border-radius:9px;background:white;color:#52709c;font-size:15px;cursor:pointer}.plan-macro-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:13px}.plan-macro-grid>div{background:#f5f8fd;padding:11px;border-radius:12px}.plan-macro-grid b{font-size:18px}.plan-chips{display:flex;overflow-x:auto;gap:6px;padding:13px 0;scrollbar-width:none}.plan-chips button{white-space:nowrap;background:#f2f5fa;border:1px solid #e6ebf3;color:#7b879a;padding:7px 12px;border-radius:30px;font-size:12px}.plan-chips button.active{background:#e6f0ff;color:#326df6;border-color:#b6d2ff}.plan-candidates{max-height:440px;overflow-y:auto}.plan-candidate{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #edf0f6}.plan-candidate:last-child{border-bottom:0}.plan-slot-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px}.plan-slot-buttons button{background:#f0f5ff;border:1px solid #dce8fd;border-radius:12px;color:#386cbb;padding:10px 3px;font-size:11px}.plan-saved{margin-top:13px}@media(min-width:520px){.plan-macro-grid{grid-template-columns:repeat(4,1fr)}}
+.plan-modes{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}.plan-modes button{padding:13px 9px;text-align:left;border-radius:15px;border:1px solid #e2eaf6;background:#fff;color:#7f8aa3}.plan-modes button.active{border-color:#679aff;background:#ebf3ff;color:#285ac0}.plan-modes b{font-size:13px;display:block}.plan-modes span{display:block;font-size:10px;margin-top:5px}.plan-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}.plan-days button{display:grid;gap:4px;place-items:center;padding:9px 0;border:1px solid #ebeff6;border-radius:11px;background:#fff;color:#8993a7}.plan-days button.active{background:#ebf3ff;border-color:#7ba5ff;color:#326df6}.plan-days button span{font-size:10px}.plan-days button b{font-size:15px}.recipe-open{border:0;background:transparent;color:#326df6;font-size:12px;font-weight:800;text-align:left;padding:8px 0 0;cursor:pointer}.plan-row{display:flex;align-items:center;gap:9px;border-bottom:1px solid #ebeff6;padding:11px 0}.plan-row:last-child{border-bottom:0}.plan-row b,.plan-candidate b{font-size:12px}.plan-emoji{min-width:37px;height:37px;background:#f3f7fe;border-radius:12px;display:grid;place-items:center;font-size:21px}.plan-nutrients{font-size:11px;font-weight:800;color:#4876b5;margin-top:3px}.plan-acts{display:flex;flex-direction:column;gap:4px}.plan-acts button{min-width:45px}.plan-icon{border:1px solid #e8edf6;border-radius:9px;background:white;color:#52709c;font-size:15px;cursor:pointer}.plan-macro-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px;margin-top:13px}.plan-macro-grid>div{background:#f5f8fd;padding:11px;border-radius:12px}.plan-macro-grid b{font-size:18px}.plan-chips{display:flex;overflow-x:auto;gap:6px;padding:13px 0;scrollbar-width:none}.plan-chips button{white-space:nowrap;background:#f2f5fa;border:1px solid #e6ebf3;color:#7b879a;padding:7px 12px;border-radius:30px;font-size:12px}.plan-chips button.active{background:#e6f0ff;color:#326df6;border-color:#b6d2ff}.plan-candidates{max-height:440px;overflow-y:auto}.plan-candidate{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #edf0f6}.plan-candidate:last-child{border-bottom:0}.plan-slot-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px}.plan-slot-buttons button{background:#f0f5ff;border:1px solid #dce8fd;border-radius:12px;color:#386cbb;padding:10px 3px;font-size:11px}#recipeSteps{width:100%;padding:11px 12px;font:inherit;background:#f8fafd;color:#17243d;border:1px solid #e3e9f2;border-radius:11px;resize:vertical}.plan-saved{margin-top:13px}@media(min-width:520px){.plan-macro-grid{grid-template-columns:repeat(4,1fr)}}
 `;document.head.append(style);
 render();
 })();
